@@ -1,6 +1,7 @@
 from readingMesh import readingMesh
 
 fileName = '../fixtures/Thermal.inp'
+# fileName = '../fixtures/Dam_plane.inp'
 
 [elementsLibrary, nodesLibrary] = readingMesh(fileName)
 
