@@ -7,11 +7,14 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from readingMesh import readingMesh
 
-# fileName = '../fixtures/Thermal.inp'
-fileName = '../fixtures/Dam_plane.inp'
+# import pandas as pd
+
+
+
+fileName = '../fixtures/Thermal.inp'
+# fileName = '../fixtures/Dam_plane.inp'
 
 [Element_library, Node_library] = readingMesh(fileName)
-
 
 Area = 0.5
 t = 1
@@ -49,10 +52,10 @@ NumberOfElements = len(Element_library)
 #     Node_library[node_label] = [CoordinatesX[index], CoordinatesY[index]]
 #     index+=1
 
-# # print('Node_library')
-# # print(Node_library)
-# # print('Element_library')
-# # print(Element_library)
+# print('Node_library')
+# print(Node_library)
+# print('Element_library')
+# print(Element_library)
 
 #%%Conductivity matrix assembling    
 
@@ -102,6 +105,7 @@ for Element in Element_library:
     l = (NodeLabel2 - 1)
     m = (NodeLabel3 - 1)
 
+
 #######Заполнение главной диагонали############
     K[k, k] += Klocal[0,0]
     K[l, l] += Klocal[1,1]
@@ -124,6 +128,15 @@ for Element in Element_library:
 
 ######Нижний блок m - l##########      
     K[m, l] += Klocal[2,1]
+
+# print(K)
+
+# df = pd.DataFrame(K)
+# df.to_excel('матрица.xlsx')
+
+
+# print(Jakobi)
+# print([[dN1_dksi, dN2_dksi, dN3_dksi],[dN1_deta, dN2_deta, dN3_deta]])
 
 #%%Boundary conditions and loads
 
@@ -171,4 +184,4 @@ plt.title('Temperature')
 plt.colorbar()
 #plt.axes().set_aspect('equal') 
 
-plt.show()
+#plt.show()
