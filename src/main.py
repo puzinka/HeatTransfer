@@ -49,8 +49,10 @@ initialTemperature = np.zeros(len(thermalForceWithBC))
 
 temperature = solveOfTransitiveHeatTransfer(initialTemperature, heatCapcitnceMatrixWithBC, conductivityMatrixWithBC, thermalForceWithBC, timeStep)
 
+for t in temperature:
+    print(t[68])
 # print(temperature)
-i = 1
+i = 0
 plotting2D(elementsLibrary, nodesLibrary, temperature[i])
 
 

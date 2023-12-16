@@ -1,34 +1,33 @@
 import meshio
-from main import elementsLibrary, nodesLibrary, temperature
+from readingMesh import readingMesh
+from main import temperature, elementsLibrary, nodesLibrary
 
-nodes = []
-for node in nodesLibrary:
-    nodes.append(nodesLibrary[node])
-points = nodes
+
+points = []
+for i in nodesLibrary:
+    points.append(nodesLibrary[i])
 
 elements = []
-for el in elementsLibrary:
-    elements.append(elementsLibrary[el])
-for i in range(len(elements)):
-    for j in range(len(elements[i])):
-        elements[i][j] -= 1
+for i in elementsLibrary:
+    elements.append([x - 1 for x in elementsLibrary[i]])
+
 cells = [
-    ("triangle", elements),
+    ("triangle", elements)
 ]
 
-data = dict()
+transitiveTemperature = dict()
 for step in range(len(temperature)):
-    data[f"{step}"] = temperature[step]
-print(data)
+    transitiveTemperature[str(step)] = temperature[step]
+
+# print(transitiveTemperature)
 
 mesh = meshio.Mesh(
     points,
     cells,
-    point_data = {"T": data},
+    point_data = transitiveTemperature,
 )
 
 mesh.write(
-    "data.vtk", 
+    "mesh.vtk",  # str, os.PathLike, or buffer/open file
+    # file_format="vtk",  # optional if first argument is a path; inferred from extension
 )
-
-meshio.write_points_cells("data.vtk", points, cells)

@@ -8,7 +8,7 @@ def getConductivityMatrix(elementsLibrary, nodesLibrary, conductivity):
     globalCondictivityMatrix = np.zeros([len(nodesLibrary), len(nodesLibrary)])
     materialPropertiesMatrix = [[conductivity, 0], [0, conductivity]]
 
-    for number in range(1, len(elementsLibrary)):
+    for number in range(1, len(elementsLibrary) + 1):
 
         coordinatesMatrix = []
         nodeNumbers = []

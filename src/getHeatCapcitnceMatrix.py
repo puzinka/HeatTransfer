@@ -9,7 +9,7 @@ def getHeatCapcitnceMatrix(elementsLibrary, nodesLibrary, density, specificHeat)
     # интеграл [N]^T[N] по объёму через L-координаты
     localMatrix = np.array([[1/6, 1/12, 1/12], [1/12, 1/6, 1/12], [1/12, 1/12, 1/6]])
 
-    for number in range(1, len(elementsLibrary)):
+    for number in range(1, len(elementsLibrary) + 1):
 
         coordinatesMatrix = []
         nodeNumbers = []
