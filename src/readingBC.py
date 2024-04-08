@@ -19,6 +19,6 @@ def getBC(fileName):
         # температура на границе тела
         temperature = lines[index + 2].split(', ')[-1]
 
-        BC[float(temperature)] = nodesBC.astype(int)
+        BC[float(temperature)] = nodesBC.astype(float)
 
     return BC
