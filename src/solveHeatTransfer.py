@@ -1,59 +1,901 @@
-from decimal import Decimal, getcontext
 
 import numpy as np
 import numpy.linalg as la
 
-# from readingBC import getBC
-# from applyBC import applyBCtoVector
-# from convertToDecimal import convertToDecimalMatrix, convertToDecimalVector, convertToDecimalNumber
-# from operationsMatrix import multiplyMatrixToMatrix, multiplyMatrixToVector, sumVectors, subVectors, multiplyNumberToVector
-
-# # fileName = '../fixtures/december10.inp'
-# fileName = '../fixtures/december10.inp'
-# # fileName = '../fixtures/test_2_feb.inp'
-# BC = getBC(fileName)
-
+from applyBC import nullMatrixRow, applyBCtoF, nullMatrixCol
+from convertToDecimal import convertToDecimalMatrix, convertToDecimalNumber
 
 # решение стационарной задачи теплопроводности
 
-def solveOfSteadyStateHeatTransfer(conductivityMatrixWithBC, thermalForceWithBC):
-    temperature = la.solve(conductivityMatrixWithBC,thermalForceWithBC)
+set11 = [2,   3,   5,   6,  16,  17,  18,  19,  20,  21,  22,  23,  24,  39,  40,  41,
+  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,
+  58,  59,  60,  61,  62,  63,  64,  65, 147, 148, 149, 150, 151, 152, 153, 154,
+ 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
+ 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186,
+ 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202,
+ 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218,
+ 219, 220, 221, 222, 223, 224, 225, 226, 227]
+
+set22 = [ 1,   4,   5,   6,   7,   8,   9,  10,  30,  31,  32,  33,  34,  35,  36,  37,
+  38,  48,  49,  50,  51,  52,  53,  54,  55,  56,  66,  67,  68,  69,  70,  71,
+  72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,
+  88,  89,  90,  91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 250, 251,
+ 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267,
+ 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283,
+ 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299,
+ 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315,
+ 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330]
+
+# set11 = [45,   95,   96,   97,   98,   99,  100,  101,  102,  103,  104,  105,  106,  107,  108,  109,
+#   110,  111,  112,  113,  114,  115,  116,  117,  118,  119,  120,  121,  122,  123,  124,  125,
+#   126,  127,  128,  129,  130,  131,  132,  133,  134,  135,  136,  137,  138,  139,  140,  141,
+#   142, 1241, 1242, 1243, 1244, 1245, 1246, 1247, 1248, 1249, 1250, 1251, 1252, 1253, 1254, 1255,
+#  1256, 1257, 1258, 1259, 1260, 1261, 1262, 1263, 1264, 1265, 1266, 1267, 1268, 1269, 1270, 1271,
+#  1272, 1273, 1274, 1275, 1276, 1277, 1278, 1279, 1280, 1281, 1282, 1283, 1284, 1285, 1286, 1287,
+#  1288, 1289, 1290, 1291, 1292]
+
+# set22 = [44,   46,   47,   48,   49,   50,   51,   52,   53,   54,   55,   56,   57,   58,   59,   60,
+#    61,   62,   63,   64,   65,   66,   67,   68,   69,   70,   71,   72,   73,   74,   75,   76,
+#    77,   78,   79,   80,   81,   82,   83,   84,   85,   86,   87,   88,   89,   90,   91,   92,
+#    93,   94,   95, 1151, 1152, 1153, 1154, 1155, 1156, 1157, 1158, 1159, 1160, 1161, 1162, 1163,
+#  1164, 1165, 1166, 1167, 1168, 1169, 1170, 1171, 1172, 1173, 1174, 1175, 1176, 1177, 1178, 1179,
+#  1180, 1181, 1182, 1183, 1184, 1185, 1186, 1187, 1188, 1189, 1190, 1191, 1192, 1193, 1194, 1195,
+#  1196, 1197, 1198, 1199, 1200, 1201, 1202, 1203, 1204, 1205, 1206, 1207, 1208, 1209, 1210, 1211,
+#  1212, 1213, 1214, 1215, 1216, 1217, 1218, 1219, 1220, 1221, 1222, 1223, 1224, 1225, 1226, 1227,
+#  1228, 1229, 1230, 1231, 1232, 1233, 1234, 1235, 1236, 1237, 1238, 1239, 1240]
+
+arrayBCs = {5.0: set11,	20: set22}
+
+def solveOfSteadyStateHeatTransfer(conductivityMatrix, force, flag):
+
+    matrixK = nullMatrixRow(conductivityMatrix, arrayBCs, flag)
+    newForce = applyBCtoF(matrixK, force, arrayBCs, flag)
+    newConductivityMatrix = nullMatrixCol(matrixK, arrayBCs, flag)
+
+    temperature = la.solve(newConductivityMatrix, newForce)
+
     return temperature
 
 
+
+
 # решение нестационарной задачи теплопроводности
+# set1 = [2,   3,   5,   6,  16,  17,  18,  19,  20,  21,  22,  23,  24,  39,  40,  41,
+#   42,  43,  44,  45,  46,  47,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,
+#   58,  59,  60,  61,  62,  63,  64,  65, 147, 148, 149, 150, 151, 152, 153, 154,
+#  155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
+#  171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186,
+#  187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202,
+#  203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218,
+#  219, 220, 221, 222, 223, 224, 225, 226, 227]
 
-def solveOfTransitiveHeatTransfer(initialT, capcitnceMatrix, conductivityMatrix, force, timeStep, countStep, BC):
-    
+# set2 = [1,   4,   5,   6,   7,   8,   9,  10,  30,  31,  32,  33,  34,  35,  36,  37,
+#   38,  48,  49,  50,  51,  52,  53,  54,  55,  56,  66,  67,  68,  69,  70,  71,
+#   72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,
+#   88,  89,  90,  91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 250, 251,
+#  252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267,
+#  268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283,
+#  284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299,
+#  300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315,
+#  316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330]
+
+set1 = [2,  5, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+
+set2 = [1,  3,  4,  5, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+
+arrayBC = [
+{5.0: set1,	18.7: set2},
+{5.0: set1,	20.6: set2},
+{5.0: set1,	18.2: set2},
+{5.0: set1,	10.1: set2},
+{5.0: set1,	8.8: set2},
+{5.0: set1,	12.1: set2},
+{5.0: set1,	15.7: set2},
+{5.0: set1,	11: set2},
+{5.0: set1,	10.9: set2},
+{5.0: set1,	16.6: set2},
+# {5.0: set1,	21.1: set2},
+# {5.0: set1,	14.4: set2},
+# {5.0: set1,	7.6: set2},
+# {5.0: set1,	9.3: set2},
+# {5.0: set1,	13.4: set2},
+# {5.0: set1,	19.7: set2},
+# {5.0: set1,	17.9: set2},
+# {5.0: set1,	18.9: set2},
+# {5.0: set1,	12.8: set2},
+# {5.0: set1,	10.7: set2},
+# {5.0: set1,	10.7: set2},
+# {5.0: set1,	8: set2},
+# {5.0: set1,	6.6: set2},
+# {5.0: set1,	7.2: set2},
+# {5.0: set1,	3.7: set2},
+# {5.0: set1,	5: set2},
+# {5.0: set1,	8: set2},
+# {5.0: set1,	11.5: set2},
+# {5.0: set1,	10.4: set2},
+# {5.0: set1,	-1.6: set2},
+# {5.0: set1,	-3.2: set2},
+# {5.0: set1,	-2.3: set2},
+# {5.0: set1,	-0.3: set2},
+# {5.0: set1,	2.5: set2},
+# {5.0: set1,	6.7: set2},
+# {5.0: set1,	12.5: set2},
+# {5.0: set1,	16.6: set2},
+# {5.0: set1,	16.1: set2},
+# {5.0: set1,	8.3: set2},
+# {5.0: set1,	7.9: set2},
+# {5.0: set1,	8: set2},
+# {5.0: set1,	5.7: set2},
+# {5.0: set1,	8.9: set2},
+# {5.0: set1,	13.2: set2},
+# {5.0: set1,	16.7: set2},
+# {5.0: set1,	16.6: set2},
+# {5.0: set1,	10.8: set2},
+# {5.0: set1,	4.2: set2},
+# {5.0: set1,	6: set2},
+# {5.0: set1,	12.6: set2},
+# {5.0: set1,	19.5: set2},
+# {5.0: set1,	23.1: set2},
+# {5.0: set1,	22.2: set2},
+# {5.0: set1,	15.6: set2},
+# {5.0: set1,	8.6: set2},
+# {5.0: set1,	5.9: set2},
+# {5.0: set1,	12.8: set2},
+# {5.0: set1,	19.1: set2},
+# {5.0: set1,	18.6: set2},
+# {5.0: set1,	21.1: set2},
+# {5.0: set1,	19.6: set2},
+# {5.0: set1,	12.9: set2},
+# {5.0: set1,	14.8: set2},
+# {5.0: set1,	18.8: set2},
+# {5.0: set1,	20.4: set2},
+# {5.0: set1,	20.4: set2},
+# {5.0: set1,	15.1: set2},
+# {5.0: set1,	15.3: set2},
+# {5.0: set1,	13.2: set2},
+# {5.0: set1,	18.9: set2},
+# {5.0: set1,	18.1: set2},
+# {5.0: set1,	11.6: set2},
+# {5.0: set1,	11.1: set2},
+# {5.0: set1,	13.1: set2},
+# {5.0: set1,	17.5: set2},
+# {5.0: set1,	8.3: set2},
+# {5.0: set1,	8.6: set2},
+# {5.0: set1,	6.6: set2},
+# {5.0: set1,	8.5: set2},
+# {5.0: set1,	12.3: set2},
+# {5.0: set1,	21.7: set2},
+# {5.0: set1,	23.9: set2},
+# {5.0: set1,	21.8: set2},
+# {5.0: set1,	18.6: set2},
+# {5.0: set1,	16.9: set2},
+# {5.0: set1,	15.8: set2},
+# {5.0: set1,	13.9: set2},
+# {5.0: set1,	13.2: set2},
+# {5.0: set1,	17.6: set2},
+# {5.0: set1,	24.1: set2},
+# {5.0: set1,	20.2: set2},
+# {5.0: set1,	19.6: set2},
+# {5.0: set1,	24.1: set2},
+# {5.0: set1,	25.2: set2},
+# {5.0: set1,	20: set2},
+# {5.0: set1,	13: set2},
+# {5.0: set1,	13.5: set2},
+# {5.0: set1,	16.2: set2},
+# {5.0: set1,	17.7: set2},
+# {5.0: set1,	18.3: set2},
+# {5.0: set1,	18.7: set2},
+# {5.0: set1,	19.1: set2},
+# {5.0: set1,	20.2: set2},
+# {5.0: set1,	20.8: set2},
+# {5.0: set1,	23.1: set2},
+# {5.0: set1,	16.8: set2},
+# {5.0: set1,	17.8: set2},
+# {5.0: set1,	19.7: set2},
+# {5.0: set1,	22.2: set2},
+# {5.0: set1,	24: set2},
+# {5.0: set1,	19.1: set2},
+# {5.0: set1,	17.9: set2},
+# {5.0: set1,	11.4: set2},
+# {5.0: set1,	13.5: set2},
+# {5.0: set1,	17.8: set2},
+# {5.0: set1,	15.9: set2},
+# {5.0: set1,	16.5: set2},
+# {5.0: set1,	16.5: set2},
+# {5.0: set1,	15.4: set2},
+# {5.0: set1,	19.5: set2},
+# {5.0: set1,	19.7: set2},
+# {5.0: set1,	20.6: set2},
+# {5.0: set1,	22.9: set2},
+# {5.0: set1,	22.3: set2},
+# {5.0: set1,	25.9: set2},
+# {5.0: set1,	27.4: set2},
+# {5.0: set1,	24.6: set2},
+# {5.0: set1,	25.4: set2},
+# {5.0: set1,	25.1: set2},
+# {5.0: set1,	22.9: set2},
+# {5.0: set1,	23.1: set2},
+# {5.0: set1,	26.9: set2},
+# {5.0: set1,	25.8: set2},
+# {5.0: set1,	23.1: set2},
+# {5.0: set1,	23.2: set2},
+# {5.0: set1,	22.9: set2},
+# {5.0: set1,	22.3: set2},
+# {5.0: set1,	24.2: set2},
+# {5.0: set1,	26.6: set2},
+# {5.0: set1,	21.7: set2},
+# {5.0: set1,	20.9: set2},
+# {5.0: set1,	22.3: set2},
+# {5.0: set1,	24.2: set2},
+# {5.0: set1,	25.2: set2},
+# {5.0: set1,	24.7: set2},
+# {5.0: set1,	25.4: set2},
+# {5.0: set1,	25.8: set2},
+# {5.0: set1,	25.3: set2},
+# {5.0: set1,	25.7: set2},
+# {5.0: set1,	23.6: set2},
+# {5.0: set1,	25.8: set2},
+# {5.0: set1,	27.3: set2},
+# {5.0: set1,	28.2: set2},
+# {5.0: set1,	26.9: set2},
+# {5.0: set1,	24.4: set2},
+# {5.0: set1,	24.2: set2},
+# {5.0: set1,	25.8: set2},
+# {5.0: set1,	26.2: set2},
+# {5.0: set1,	25.2: set2},
+# {5.0: set1,	27: set2},
+# {5.0: set1,	29.8: set2},
+# {5.0: set1,	28.1: set2},
+# {5.0: set1,	24.9: set2},
+# {5.0: set1,	23.7: set2},
+# {5.0: set1,	26.9: set2},
+# {5.0: set1,	28.8	: set2},
+# {5.0: set1,	28.4	: set2},
+# {5.0: set1,	28.7	: set2},
+# {5.0: set1,	29.3	: set2},
+# {5.0: set1,	29.6	: set2},
+# {5.0: set1,	31.6	: set2},
+# {5.0: set1,	30.2	: set2},
+# {5.0: set1,	28.5	: set2},
+# {5.0: set1,	28.6	: set2},
+# {5.0: set1,	29.4	: set2},
+# {5.0: set1,	32	: set2},
+# {5.0: set1,	32.5	: set2},
+# {5.0: set1,	32.3	: set2},
+# {5.0: set1,	32	: set2},
+# {5.0: set1,	31.9	: set2},
+# {5.0: set1,	31.4	: set2},
+# {5.0: set1,	29.9	: set2},
+# {5.0: set1,	27.8	: set2},
+# {5.0: set1,	30.9	: set2},
+# {5.0: set1,	29.6	: set2},
+# {5.0: set1,	31.2	: set2},
+# {5.0: set1,	31.3	: set2},
+# {5.0: set1,	29.9	: set2},
+# {5.0: set1,	31.1	: set2},
+# {5.0: set1,	28.7	: set2},
+# {5.0: set1,	29.3	: set2},
+# {5.0: set1,	30.1	: set2},
+# {5.0: set1,	32.6	: set2},
+# {5.0: set1,	32.8	: set2},
+# {5.0: set1,	33.7	: set2},
+# {5.0: set1,	32.7	: set2},
+# {5.0: set1,	28.9	: set2},
+# {5.0: set1,	31	: set2},
+# {5.0: set1,	35.3	: set2},
+# {5.0: set1,	34.2	: set2},
+# {5.0: set1,	33.4	: set2},
+# {5.0: set1,	33.5	: set2},
+# {5.0: set1,	30.1	: set2},
+# {5.0: set1,	29.4	: set2},
+# {5.0: set1,	31.4	: set2},
+# {5.0: set1,	33.1	: set2},
+# {5.0: set1,	33.3	: set2},
+# {5.0: set1,	32.8	: set2},
+# {5.0: set1,	32.9	: set2},
+# {5.0: set1,	33.3	: set2},
+# {5.0: set1,	33.6	: set2},
+# {5.0: set1,	34.6	: set2},
+# {5.0: set1,	34.7	: set2},
+# {5.0: set1,	35.3	: set2},
+# {5.0: set1,	35.1	: set2},
+# {5.0: set1,	34.8	: set2},
+# {5.0: set1,	35.3	: set2},
+# {5.0: set1,	34.7	: set2},
+# {5.0: set1,	34.8	: set2},
+# {5.0: set1,	34.1	: set2},
+# {5.0: set1,	34.5	: set2},
+# {5.0: set1,	34.7	: set2},
+# {5.0: set1,	35.3	: set2},
+# {5.0: set1,	34.8	: set2},
+# {5.0: set1,	34.9	: set2},
+# {5.0: set1,	34.5	: set2},
+# {5.0: set1,	29.4	: set2},
+# {5.0: set1,	28.7	: set2},
+# {5.0: set1,	31.8	: set2},
+# {5.0: set1,	36	: set2},
+# {5.0: set1,	36.1	: set2},
+# {5.0: set1,	36.5	: set2},
+# {5.0: set1,	34.7	: set2},
+# {5.0: set1,	34.4	: set2},
+# {5.0: set1,	34.4	: set2},
+# {5.0: set1,	35.5	: set2},
+# {5.0: set1,	35.8	: set2},
+# {5.0: set1,	36.2	: set2},
+# {5.0: set1,	34.2	: set2},
+# {5.0: set1,	29.9	: set2},
+# {5.0: set1,	29.9	: set2},
+# {5.0: set1,	31.1	: set2},
+# {5.0: set1,	30.8	: set2},
+# {5.0: set1,	30.7	: set2},
+# {5.0: set1,	29.7	: set2},
+# {5.0: set1,	30.9	: set2},
+# {5.0: set1,	30.7	: set2},
+# {5.0: set1,	32.6	: set2},
+# {5.0: set1,	34	: set2},
+# {5.0: set1,	35.2	: set2},
+
+
+# {5.0: set1,	36.2	: set2},
+# {5.0: set1,	30.4	: set2},
+# {5.0: set1,	28.2	: set2},
+# {5.0: set1,	27	: set2},
+# {5.0: set1,	25.7	: set2},
+# {5.0: set1,	24.1	: set2},
+# {5.0: set1,	22.6	: set2},
+# {5.0: set1,	23.2	: set2},
+# {5.0: set1,	25.3	: set2},
+# {5.0: set1,	26.5	: set2},
+# {5.0: set1,	26.9	: set2},
+# {5.0: set1,	29.1	: set2},
+# {5.0: set1,	26.7	: set2},
+# {5.0: set1,	28.8	: set2},
+# {5.0: set1,	29.8	: set2},
+# {5.0: set1,	30.9	: set2},
+# {5.0: set1,	32.1	: set2},
+# {5.0: set1,	26.6	: set2},
+# {5.0: set1,	28.3	: set2},
+# {5.0: set1,	28.5	: set2},
+# {5.0: set1,	28.8	: set2},
+# {5.0: set1,	29.6	: set2},
+# {5.0: set1,	28.9	: set2},
+# {5.0: set1,	27.6	: set2},
+# {5.0: set1,	26.9	: set2},
+# {5.0: set1,	26.9	: set2},
+# {5.0: set1,	28.4	: set2},
+# {5.0: set1,	23.9	: set2},
+# {5.0: set1,	23.9	: set2},
+# {5.0: set1,	18.5	: set2},
+# {5.0: set1,	17.5	: set2},
+# {5.0: set1,	22.7	: set2},
+# {5.0: set1,	24.2	: set2},
+# {5.0: set1,	22.1	: set2},
+# {5.0: set1,	19.8	: set2},
+# {5.0: set1,	23.1	: set2},
+# {5.0: set1,	17.5	: set2},
+# {5.0: set1,	15.1	: set2},
+# {5.0: set1,	13.7	: set2},
+# {5.0: set1,	14.3	: set2},
+# {5.0: set1,	19.1	: set2},
+# {5.0: set1,	21.9	: set2},
+# {5.0: set1,	23.1	: set2},
+# {5.0: set1,	23.4	: set2},
+# {5.0: set1,	23.9	: set2},
+# {5.0: set1,	24.3	: set2},
+# {5.0: set1,	22.7	: set2},
+# {5.0: set1,	23.6	: set2},
+# {5.0: set1,	22.5	: set2},
+# {5.0: set1,	25.1	: set2},
+# {5.0: set1,	17.2	: set2},
+# {5.0: set1,	10.2	: set2},
+# {5.0: set1,	6	: set2},
+# {5.0: set1,	8.1	: set2},
+# {5.0: set1,	7.4	: set2},
+# {5.0: set1,	9.2	: set2},
+# {5.0: set1,	14.4	: set2},
+# {5.0: set1,	17.6	: set2},
+# {5.0: set1,	20.2	: set2},
+# {5.0: set1,	21.9	: set2},
+# {5.0: set1,	23.1	: set2},
+# {5.0: set1,	24.3	: set2},
+# {5.0: set1,	18.8	: set2},
+# {5.0: set1,	12.8	: set2},
+# {5.0: set1,	14.7	: set2},
+# {5.0: set1,	15.3	: set2},
+# {5.0: set1,	14.6	: set2},
+# {5.0: set1,	15.2	: set2},
+# {5.0: set1,	15.4	: set2},
+# {5.0: set1,	14.4	: set2},
+# {5.0: set1,	15.1	: set2},
+# {5.0: set1,	16.4	: set2},
+# {5.0: set1,	15.6	: set2},
+# {5.0: set1,	19.2	: set2},
+# {5.0: set1,	13	: set2},
+# {5.0: set1,	9.1	: set2},
+# {5.0: set1,	10.1	: set2},
+# {5.0: set1,	10.6	: set2},
+# {5.0: set1,	10.7	: set2},
+# {5.0: set1,	7.9	: set2},
+# {5.0: set1,	5.7	: set2},
+# {5.0: set1,	9.6	: set2},
+# {5.0: set1,	11.1	: set2},
+# {5.0: set1,	14.4	: set2},
+# {5.0: set1,	12.6	: set2},
+# {5.0: set1,	10.2	: set2},
+# {5.0: set1,	12.4	: set2},
+# {5.0: set1,	12.6	: set2},
+# {5.0: set1,	11.5	: set2},
+# {5.0: set1,	12.9	: set2},
+# {5.0: set1,	14.4	: set2},
+# {5.0: set1,	20	: set2},
+# {5.0: set1,	17.1	: set2},
+# {5.0: set1,	7.5	: set2},
+# {5.0: set1,	9.1	: set2},
+# {5.0: set1,	11.6	: set2},
+# {5.0: set1,	12.3	: set2},
+# {5.0: set1,	11.8	: set2},
+# {5.0: set1,	13.2	: set2},
+# {5.0: set1,	9.7	: set2},
+# {5.0: set1,	9.8	: set2},
+# {5.0: set1,	11	: set2},
+# {5.0: set1,	9.1	: set2},
+# {5.0: set1,	12.2	: set2},
+# {5.0: set1,	14.8	: set2},
+# {5.0: set1,	15.6	: set2},
+# {5.0: set1,	16.3	: set2},
+# {5.0: set1,	16.9	: set2},
+# {5.0: set1,	8	: set2},
+# {5.0: set1,	6.2	: set2},
+# {5.0: set1,	7.5	: set2},
+# {5.0: set1,	5.3	: set2},
+# {5.0: set1,	5.8	: set2},
+# {5.0: set1,	8.2	: set2},
+# {5.0: set1,	10.9	: set2},
+# {5.0: set1,	18.7: set2},
+# {5.0: set1,	20.6: set2},
+# {5.0: set1,	18.2: set2},
+# {5.0: set1,	10.1: set2},
+# {5.0: set1,	8.8: set2},
+# {5.0: set1,	12.1: set2},
+# {5.0: set1,	15.7: set2},
+# {5.0: set1,	11: set2},
+# {5.0: set1,	10.9: set2},
+# {5.0: set1,	16.6: set2},
+# {5.0: set1,	21.1: set2},
+# {5.0: set1,	14.4: set2},
+# {5.0: set1,	7.6: set2},
+# {5.0: set1,	9.3: set2},
+# {5.0: set1,	13.4: set2},
+# {5.0: set1,	19.7: set2},
+# {5.0: set1,	17.9: set2},
+# {5.0: set1,	18.9: set2},
+# {5.0: set1,	12.8: set2},
+# {5.0: set1,	10.7: set2},
+# {5.0: set1,	10.7: set2},
+# {5.0: set1,	8: set2},
+# {5.0: set1,	6.6: set2},
+# {5.0: set1,	7.2: set2},
+# {5.0: set1,	3.7: set2},
+# {5.0: set1,	5: set2},
+# {5.0: set1,	8: set2},
+# {5.0: set1,	11.5: set2},
+# {5.0: set1,	10.4: set2},
+# {5.0: set1,	-1.6: set2},
+# {5.0: set1,	-3.2: set2},
+# {5.0: set1,	-2.3: set2},
+# {5.0: set1,	-0.3: set2},
+# {5.0: set1,	2.5: set2},
+# {5.0: set1,	6.7: set2},
+# {5.0: set1,	12.5: set2},
+# {5.0: set1,	16.6: set2},
+# {5.0: set1,	16.1: set2},
+# {5.0: set1,	8.3: set2},
+# {5.0: set1,	7.9: set2},
+# {5.0: set1,	8: set2},
+# {5.0: set1,	5.7: set2},
+# {5.0: set1,	8.9: set2},
+# {5.0: set1,	13.2: set2},
+# {5.0: set1,	16.7: set2},
+# {5.0: set1,	16.6: set2},
+# {5.0: set1,	10.8: set2},
+# {5.0: set1,	4.2: set2},
+# {5.0: set1,	6: set2},
+# {5.0: set1,	12.6: set2},
+# {5.0: set1,	19.5: set2},
+# {5.0: set1,	23.1: set2},
+# {5.0: set1,	22.2: set2},
+# {5.0: set1,	15.6: set2},
+# {5.0: set1,	8.6: set2},
+# {5.0: set1,	5.9: set2},
+# {5.0: set1,	12.8: set2},
+# {5.0: set1,	19.1: set2},
+# {5.0: set1,	18.6: set2},
+# {5.0: set1,	21.1: set2},
+# {5.0: set1,	19.6: set2},
+# {5.0: set1,	12.9: set2},
+# {5.0: set1,	14.8: set2},
+# {5.0: set1,	18.8: set2},
+# {5.0: set1,	20.4: set2},
+# {5.0: set1,	20.4: set2},
+# {5.0: set1,	15.1: set2},
+# {5.0: set1,	15.3: set2},
+# {5.0: set1,	13.2: set2},
+# {5.0: set1,	18.9: set2},
+# {5.0: set1,	18.1: set2},
+# {5.0: set1,	11.6: set2},
+# {5.0: set1,	11.1: set2},
+# {5.0: set1,	13.1: set2},
+# {5.0: set1,	17.5: set2},
+# {5.0: set1,	8.3: set2},
+# {5.0: set1,	8.6: set2},
+# {5.0: set1,	6.6: set2},
+# {5.0: set1,	8.5: set2},
+# {5.0: set1,	12.3: set2},
+# {5.0: set1,	21.7: set2},
+# {5.0: set1,	23.9: set2},
+# {5.0: set1,	21.8: set2},
+# {5.0: set1,	18.6: set2},
+# {5.0: set1,	16.9: set2},
+# {5.0: set1,	15.8: set2},
+# {5.0: set1,	13.9: set2},
+# {5.0: set1,	13.2: set2},
+# {5.0: set1,	17.6: set2},
+# {5.0: set1,	24.1: set2},
+# {5.0: set1,	20.2: set2},
+# {5.0: set1,	19.6: set2},
+# {5.0: set1,	24.1: set2},
+# {5.0: set1,	25.2: set2},
+# {5.0: set1,	20: set2},
+# {5.0: set1,	13: set2},
+# {5.0: set1,	13.5: set2},
+# {5.0: set1,	16.2: set2},
+# {5.0: set1,	17.7: set2},
+# {5.0: set1,	18.3: set2},
+# {5.0: set1,	18.7: set2},
+# {5.0: set1,	19.1: set2},
+# {5.0: set1,	20.2: set2},
+# {5.0: set1,	20.8: set2},
+# {5.0: set1,	23.1: set2},
+# {5.0: set1,	16.8: set2},
+# {5.0: set1,	17.8: set2},
+# {5.0: set1,	19.7: set2},
+# {5.0: set1,	22.2: set2},
+# {5.0: set1,	24: set2},
+# {5.0: set1,	19.1: set2},
+# {5.0: set1,	17.9: set2},
+# {5.0: set1,	11.4: set2},
+# {5.0: set1,	13.5: set2},
+# {5.0: set1,	17.8: set2},
+# {5.0: set1,	15.9: set2},
+# {5.0: set1,	16.5: set2},
+# {5.0: set1,	16.5: set2},
+# {5.0: set1,	15.4: set2},
+# {5.0: set1,	19.5: set2},
+# {5.0: set1,	19.7: set2},
+# {5.0: set1,	20.6: set2},
+# {5.0: set1,	22.9: set2},
+# {5.0: set1,	22.3: set2},
+# {5.0: set1,	25.9: set2},
+# {5.0: set1,	27.4: set2},
+# {5.0: set1,	24.6: set2},
+# {5.0: set1,	25.4: set2},
+# {5.0: set1,	25.1: set2},
+# {5.0: set1,	22.9: set2},
+# {5.0: set1,	23.1: set2},
+# {5.0: set1,	26.9: set2},
+# {5.0: set1,	25.8: set2},
+# {5.0: set1,	23.1: set2},
+# {5.0: set1,	23.2: set2},
+# {5.0: set1,	22.9: set2},
+# {5.0: set1,	22.3: set2},
+# {5.0: set1,	24.2: set2},
+# {5.0: set1,	26.6: set2},
+# {5.0: set1,	21.7: set2},
+# {5.0: set1,	20.9: set2},
+# {5.0: set1,	22.3: set2},
+# {5.0: set1,	24.2: set2},
+# {5.0: set1,	25.2: set2},
+# {5.0: set1,	24.7: set2},
+# {5.0: set1,	25.4: set2},
+# {5.0: set1,	25.8: set2},
+# {5.0: set1,	25.3: set2},
+# {5.0: set1,	25.7: set2},
+# {5.0: set1,	23.6: set2},
+# {5.0: set1,	25.8: set2},
+# {5.0: set1,	27.3: set2},
+# {5.0: set1,	28.2: set2},
+# {5.0: set1,	26.9: set2},
+# {5.0: set1,	24.4: set2},
+# {5.0: set1,	24.2: set2},
+# {5.0: set1,	25.8: set2},
+# {5.0: set1,	26.2: set2},
+# {5.0: set1,	25.2: set2},
+# {5.0: set1,	27: set2},
+# {5.0: set1,	29.8: set2},
+# {5.0: set1,	28.1: set2},
+# {5.0: set1,	24.9: set2},
+# {5.0: set1,	23.7: set2},
+# {5.0: set1,	26.9: set2},
+# {5.0: set1,	28.8	: set2},
+# {5.0: set1,	28.4	: set2},
+# {5.0: set1,	28.7	: set2},
+# {5.0: set1,	29.3	: set2},
+# {5.0: set1,	29.6	: set2},
+# {5.0: set1,	31.6	: set2},
+# {5.0: set1,	30.2	: set2},
+# {5.0: set1,	28.5	: set2},
+# {5.0: set1,	28.6	: set2},
+# {5.0: set1,	29.4	: set2},
+# {5.0: set1,	32	: set2},
+# {5.0: set1,	32.5	: set2},
+# {5.0: set1,	32.3	: set2},
+# {5.0: set1,	32	: set2},
+# {5.0: set1,	31.9	: set2},
+# {5.0: set1,	31.4	: set2},
+# {5.0: set1,	29.9	: set2},
+# {5.0: set1,	27.8	: set2},
+# {5.0: set1,	30.9	: set2},
+# {5.0: set1,	29.6	: set2},
+# {5.0: set1,	31.2	: set2},
+# {5.0: set1,	31.3	: set2},
+# {5.0: set1,	29.9	: set2},
+# {5.0: set1,	31.1	: set2},
+# {5.0: set1,	28.7	: set2},
+# {5.0: set1,	29.3	: set2},
+# {5.0: set1,	30.1	: set2},
+# {5.0: set1,	32.6	: set2},
+# {5.0: set1,	32.8	: set2},
+# {5.0: set1,	33.7	: set2},
+# {5.0: set1,	32.7	: set2},
+# {5.0: set1,	28.9	: set2},
+# {5.0: set1,	31	: set2},
+# {5.0: set1,	35.3	: set2},
+# {5.0: set1,	34.2	: set2},
+# {5.0: set1,	33.4	: set2},
+# {5.0: set1,	33.5	: set2},
+# {5.0: set1,	30.1	: set2},
+# {5.0: set1,	29.4	: set2},
+# {5.0: set1,	31.4	: set2},
+# {5.0: set1,	33.1	: set2},
+# {5.0: set1,	33.3	: set2},
+# {5.0: set1,	32.8	: set2},
+# {5.0: set1,	32.9	: set2},
+# {5.0: set1,	33.3	: set2},
+# {5.0: set1,	33.6	: set2},
+# {5.0: set1,	34.6	: set2},
+# {5.0: set1,	34.7	: set2},
+# {5.0: set1,	35.3	: set2},
+# {5.0: set1,	35.1	: set2},
+# {5.0: set1,	34.8	: set2},
+# {5.0: set1,	35.3	: set2},
+# {5.0: set1,	34.7	: set2},
+# {5.0: set1,	34.8	: set2},
+# {5.0: set1,	34.1	: set2},
+# {5.0: set1,	34.5	: set2},
+# {5.0: set1,	34.7	: set2},
+# {5.0: set1,	35.3	: set2},
+# {5.0: set1,	34.8	: set2},
+# {5.0: set1,	34.9	: set2},
+# {5.0: set1,	34.5	: set2},
+# {5.0: set1,	29.4	: set2},
+# {5.0: set1,	28.7	: set2},
+# {5.0: set1,	31.8	: set2},
+# {5.0: set1,	36	: set2},
+# {5.0: set1,	36.1	: set2},
+# {5.0: set1,	36.5	: set2},
+# {5.0: set1,	34.7	: set2},
+# {5.0: set1,	34.4	: set2},
+# {5.0: set1,	34.4	: set2},
+# {5.0: set1,	35.5	: set2},
+# {5.0: set1,	35.8	: set2},
+# {5.0: set1,	36.2	: set2},
+# {5.0: set1,	34.2	: set2},
+# {5.0: set1,	29.9	: set2},
+# {5.0: set1,	29.9	: set2},
+# {5.0: set1,	31.1	: set2},
+# {5.0: set1,	30.8	: set2},
+# {5.0: set1,	30.7	: set2},
+# {5.0: set1,	29.7	: set2},
+# {5.0: set1,	30.9	: set2},
+# {5.0: set1,	30.7	: set2},
+# {5.0: set1,	32.6	: set2},
+# {5.0: set1,	34	: set2},
+# {5.0: set1,	35.2	: set2},
+# {5.0: set1,	36.2	: set2},
+# {5.0: set1,	30.4	: set2},
+# {5.0: set1,	28.2	: set2},
+# {5.0: set1,	27	: set2},
+# {5.0: set1,	25.7	: set2},
+# {5.0: set1,	24.1	: set2},
+# {5.0: set1,	22.6	: set2},
+# {5.0: set1,	23.2	: set2},
+# {5.0: set1,	25.3	: set2},
+# {5.0: set1,	26.5	: set2},
+# {5.0: set1,	26.9	: set2},
+# {5.0: set1,	29.1	: set2},
+# {5.0: set1,	26.7	: set2},
+# {5.0: set1,	28.8	: set2},
+# {5.0: set1,	29.8	: set2},
+# {5.0: set1,	30.9	: set2},
+# {5.0: set1,	32.1	: set2},
+# {5.0: set1,	26.6	: set2},
+# {5.0: set1,	28.3	: set2},
+# {5.0: set1,	28.5	: set2},
+# {5.0: set1,	28.8	: set2},
+# {5.0: set1,	29.6	: set2},
+# {5.0: set1,	28.9	: set2},
+# {5.0: set1,	27.6	: set2},
+# {5.0: set1,	26.9	: set2},
+# {5.0: set1,	26.9	: set2},
+# {5.0: set1,	28.4	: set2},
+# {5.0: set1,	23.9	: set2},
+# {5.0: set1,	23.9	: set2},
+# {5.0: set1,	18.5	: set2},
+# {5.0: set1,	17.5	: set2},
+# {5.0: set1,	22.7	: set2},
+# {5.0: set1,	24.2	: set2},
+# {5.0: set1,	22.1	: set2},
+# {5.0: set1,	19.8	: set2},
+# {5.0: set1,	23.1	: set2},
+# {5.0: set1,	17.5	: set2},
+# {5.0: set1,	15.1	: set2},
+# {5.0: set1,	13.7	: set2},
+# {5.0: set1,	14.3	: set2},
+# {5.0: set1,	19.1	: set2},
+# {5.0: set1,	21.9	: set2},
+# {5.0: set1,	23.1	: set2},
+# {5.0: set1,	23.4	: set2},
+# {5.0: set1,	23.9	: set2},
+# {5.0: set1,	24.3	: set2},
+# {5.0: set1,	22.7	: set2},
+# {5.0: set1,	23.6	: set2},
+# {5.0: set1,	22.5	: set2},
+# {5.0: set1,	25.1	: set2},
+# {5.0: set1,	17.2	: set2},
+# {5.0: set1,	10.2	: set2},
+# {5.0: set1,	6	: set2},
+# {5.0: set1,	8.1	: set2},
+# {5.0: set1,	7.4	: set2},
+# {5.0: set1,	9.2	: set2},
+# {5.0: set1,	14.4	: set2},
+# {5.0: set1,	17.6	: set2},
+# {5.0: set1,	20.2	: set2},
+# {5.0: set1,	21.9	: set2},
+# {5.0: set1,	23.1	: set2},
+# {5.0: set1,	24.3	: set2},
+# {5.0: set1,	18.8	: set2},
+# {5.0: set1,	12.8	: set2},
+# {5.0: set1,	14.7	: set2},
+# {5.0: set1,	15.3	: set2},
+# {5.0: set1,	14.6	: set2},
+# {5.0: set1,	15.2	: set2},
+# {5.0: set1,	15.4	: set2},
+# {5.0: set1,	14.4	: set2},
+# {5.0: set1,	15.1	: set2},
+# {5.0: set1,	16.4	: set2},
+# {5.0: set1,	15.6	: set2},
+# {5.0: set1,	19.2	: set2},
+# {5.0: set1,	13	: set2},
+# {5.0: set1,	9.1	: set2},
+# {5.0: set1,	10.1	: set2},
+# {5.0: set1,	10.6	: set2},
+# {5.0: set1,	10.7	: set2},
+# {5.0: set1,	7.9	: set2},
+# {5.0: set1,	5.7	: set2},
+# {5.0: set1,	9.6	: set2},
+# {5.0: set1,	11.1	: set2},
+# {5.0: set1,	14.4	: set2},
+# {5.0: set1,	12.6	: set2},
+# {5.0: set1,	10.2	: set2},
+# {5.0: set1,	12.4	: set2},
+# {5.0: set1,	12.6	: set2},
+# {5.0: set1,	11.5	: set2},
+# {5.0: set1,	12.9	: set2},
+# {5.0: set1,	14.4	: set2},
+# {5.0: set1,	20	: set2},
+# {5.0: set1,	17.1	: set2},
+# {5.0: set1,	7.5	: set2},
+# {5.0: set1,	9.1	: set2},
+# {5.0: set1,	11.6	: set2},
+# {5.0: set1,	12.3	: set2},
+# {5.0: set1,	11.8	: set2},
+# {5.0: set1,	13.2	: set2},
+# {5.0: set1,	9.7	: set2},
+# {5.0: set1,	9.8	: set2},
+# {5.0: set1,	11	: set2},
+# {5.0: set1,	9.1	: set2},
+# {5.0: set1,	12.2	: set2},
+# {5.0: set1,	14.8	: set2},
+# {5.0: set1,	15.6	: set2},
+# {5.0: set1,	16.3	: set2},
+# {5.0: set1,	16.9	: set2},
+# {5.0: set1,	8	: set2},
+# {5.0: set1,	6.2	: set2},
+# {5.0: set1,	7.5	: set2},
+# {5.0: set1,	5.3	: set2},
+# {5.0: set1,	5.8	: set2},
+# {5.0: set1,	8.2	: set2},
+# {5.0: set1,	10.9	: set2}
+]
+
+
+
+def solveOfTransitiveHeatTransfer(initialT, capcitnceMatrix, conductivityMatrix, force, flag = False):
+
     temperatureMoments = []
+    temperatureMoments.append(initialT)
+    invC = np.linalg.inv(capcitnceMatrix)
+    timeStep = 1
 
-    # T1 = initialT
-    # temperatureMoments.append(T1)
 
-    # A = 0.5 * capcitnceMatrix + timeStep * (1/6) * conductivityMatrix
-    # B1 = 0.5 * force - np.dot((timeStep * (1/3) * conductivityMatrix - 0.5 * capcitnceMatrix), T1)
-    # T2 = np.linalg.solve(A, B1)
-    # temperatureMoments.append(T2)
 
-    # for i in range(1, countStep):
-    #     B = -force - (2/3) * timeStep * np.dot(conductivityMatrix, T2) - np.dot((timeStep * (1/6) * conductivityMatrix - 0.5 * capcitnceMatrix), T1)
-    #     T3 = np.linalg.solve(A, B)
+    stepNumber = 0
 
-    #     temperatureMoments.append(T3)
 
-    #     T1 = T2
-    #     T2 = T3
 
+    for BC in arrayBC:
+
+
+
+        stepNumber += 1
+        print(stepNumber)
+
+        
+
+        matrixK = nullMatrixRow(conductivityMatrix, BC, flag)
+        newForce = applyBCtoF(matrixK, force, BC, flag)
+        newConductivityMatrix = nullMatrixCol(matrixK, BC, flag)
+
+        T = initialT - timeStep * np.dot(np.dot(invC, newConductivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
+
+        temperatureMoments.append(T)
+
+        initialT = T
+
+    
+    return temperatureMoments
+
+
+# def solveOfTransitiveHeatTransferOld(initialT, capcitnceMatrix, conductivityMatrix, force, timeStep, countStep, BC):
+    
+#     temperatureMoments = []
+#     temperatureMoments.append(initialT)
+
+#     invC = np.linalg.inv(capcitnceMatrix)
+
+#     for i in range(1, countStep):
+#         T = initialT - timeStep * np.dot(np.dot(invC, conductivityMatrix), initialT) + timeStep * np.dot(invC, force)
+
+#         for temperature in BC:
+#             for node in BC[temperature]:
+#                 T[int(node) - 1] = temperature
+
+#         temperatureMoments.append(T)
+
+#         initialT = T
+
+#     return temperatureMoments
+
+def solveOfTransitiveHeatTransferOld(initialT, capcitnceMatrix, conductivityMatrix, force):
+    
+    timeStep = 1
+
+    temperatureMoments = []
     temperatureMoments.append(initialT)
 
     invC = np.linalg.inv(capcitnceMatrix)
 
-    for i in range(1, countStep):
-        T = initialT - timeStep * np.dot(np.dot(invC, conductivityMatrix), initialT) + timeStep * np.dot(invC, force)
+    for BC in arrayBC:
 
-        for temperature in BC:
-            for node in BC[temperature]:
-                T[int(node) - 1] = temperature
+        matrixK = nullMatrixRow(conductivityMatrix, BC, False)
+        newForce = applyBCtoF(matrixK, force, BC, False)
+        newConductivityMatrix = nullMatrixCol(matrixK, BC, False)
+
+        T = initialT - timeStep * np.dot(np.dot(invC, newConductivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
+
+        # for temperature in BC:
+        #     for node in BC[temperature]:
+        #         T[int(node) - 1] = temperature
 
         temperatureMoments.append(T)
 
@@ -61,179 +903,4 @@ def solveOfTransitiveHeatTransfer(initialT, capcitnceMatrix, conductivityMatrix,
 
     return temperatureMoments
 
-# def solveOfTransitiveHeatTransfer(initialTemperature, heatCapcitnceMatrixWithBC, conductivityMatrixWithBC, thermalForceWithBC, timeStep):
 
-#     temperatureMoments = []
-#     temperatureMoments.append(initialTemperature)
-
-#     diff = 100
-#     stepNumber = 1
-
-#     while diff > 0.1:
-
-#         # A*X=B
-#         A = 0.5 * heatCapcitnceMatrixWithBC + (timeStep * stepNumber / 6) * conductivityMatrixWithBC
-#         B = 0.5 * thermalForceWithBC - np.matmul((-0.5 * heatCapcitnceMatrixWithBC + (timeStep * stepNumber / 3) * conductivityMatrixWithBC), initialTemperature)
-
-#         temperature = la.solve(A, B)
-#         temperatureMoments.append(temperature)
-
-#         diff = max(abs(temperatureMoments[-2] - temperatureMoments[-1]))
-
-#         stepNumber += 1
-
-#     return temperatureMoments
-
-# tmp = {0: 30, 1: 28, 2: 26, 3: 24, 4: 22, 5: 20, 6: 18, 7: 16, 8: 14, 9: 12, 10: 10}
-
-
-# def solveOfTransitiveHeatTransfer(initialTemperature, heatCapcitnceMatrixWithBC, conductivityMatrixWithBC, thermalForceWithBC, timeStep):
-
-#     temperatureMoments = []
-#     # temperatureMoments.append(initialTemperature)
-
-#     stepNumber = 1
-
-#     tetta = 0.5
-
-#     temperatureMoments.append(initialTemperature)
-
-#     force1 = thermalForceWithBC
-#     force2 = thermalForceWithBC
-
-#     for step in range(len(tmp) - 1):
-     
-#         for node in BC[1.0]:
-#             force1[node - 1] = tmp[step]
-#             force2[node - 1] = tmp[step + 1]
-
-#         force = force1 + tetta * (force2 - force1)
-
-#         # K*X=F
-#         K = heatCapcitnceMatrixWithBC + timeStep * tetta * conductivityMatrixWithBC
-#         F = np.dot(heatCapcitnceMatrixWithBC - timeStep * (1 - tetta) * conductivityMatrixWithBC, initialTemperature) + timeStep * force
-
-#         temperature = la.solve(K, F)
-
-#         temperatureMoments.append(temperature)
-
-#         initialTemperature = temperature
-
-#         stepNumber += 1
-
-#     return temperatureMoments
-
-
-# -----------------------------------------------------------------по Сегерлинду 
-
-# def solveOfTransitiveHeatTransfer(initialTemperature, heatCapcitnceMatrixWithBC, conductivityMatrixWithBC, thermalForceWithBC, timeStep):
-
-#     temperatureMoments = []
-#     # temperatureMoments.append(initialTemperature)
-
-#     stepNumber = 1
-
-#     temperature1 = initialTemperature
-#     temperatureMoments.append(temperature1)
-
-#     for node in BC[1.0]:
-#         thermalForceWithBC[node - 1] = tmp[0]
-
-#     A = 0.5 * heatCapcitnceMatrixWithBC + (timeStep / 6) * conductivityMatrixWithBC
-#     B = 0.5 * thermalForceWithBC - np.matmul((-0.5 * heatCapcitnceMatrixWithBC + (timeStep / 3) * conductivityMatrixWithBC), initialTemperature)
-#     temperature2 = la.solve(A, B)
-#     temperatureMoments.append(temperature2)
-
-#     ###
-#     thermalForceInitial = thermalForceWithBC
-#     ###
-
-#     for step in range(1, len(tmp)):
-     
-#         for node in BC[1.0]:
-#             thermalForceWithBC[node - 1] = tmp[step]
-
-#         ###
-#         thermalForceDiff = -thermalForceWithBC + thermalForceInitial
-#         ###
-
-#         # A*X=B
-#         # A = 0.5 * heatCapcitnceMatrixWithBC + (timeStep * stepNumber / 6) * conductivityMatrixWithBC
-#         # B = 0.5 * thermalForceWithBC - np.matmul((-0.5 * heatCapcitnceMatrixWithBC + (timeStep * stepNumber / 3) * conductivityMatrixWithBC), initialTemperature)
-
-#         # A = 0.5 * heatCapcitnceMatrixWithBC + (timeStep / 6) * conductivityMatrixWithBC
-#         # B = thermalForceWithBC - np.matmul((-0.5 * heatCapcitnceMatrixWithBC + (timeStep / 6) * conductivityMatrixWithBC), temperature1) - (2 / 3) * timeStep * np.matmul(conductivityMatrixWithBC, temperature2)
-
-#         A = 0.5 * heatCapcitnceMatrixWithBC + (timeStep / 6) * conductivityMatrixWithBC
-#         B = thermalForceDiff - np.matmul((-0.5 * heatCapcitnceMatrixWithBC + (timeStep / 6) * conductivityMatrixWithBC), temperature1) - (2 / 3) * timeStep * np.matmul(conductivityMatrixWithBC, temperature2)
-        
-#         temperature3 = la.solve(A, B)
-
-#         temperatureMoments.append(temperature3)
-
-#         temperature1 = temperature2
-#         temperature2 = temperature3
-
-#         stepNumber += 1
-
-#     return temperatureMoments
-
-
-#-------------------------------------------по Сегерлинду с модификацией
-
-# def solveOfTransitiveHeatTransfer(initialTemperature, heatCapcitnceMatrixWithBC, conductivityMatrixWithBC, thermalForceWithBC, timeStep):
-
-#     temperatureMoments = []
-#     # temperatureMoments.append(initialTemperature)
-
-#     stepNumber = 1
-
-#     temperature = initialTemperature
-#     temperatureMoments.append(temperature)
-
-#     for step in tmp:
-     
-#         for node in BC[1.0]:
-#             thermalForceWithBC[node - 1] = tmp[step]
-
-#         # A*X=B
-#         A = 0.5 * heatCapcitnceMatrixWithBC + (timeStep * stepNumber / 6) * conductivityMatrixWithBC
-#         B = 0.5 * thermalForceWithBC - np.matmul((-0.5 * heatCapcitnceMatrixWithBC + (timeStep * stepNumber / 3) * conductivityMatrixWithBC), initialTemperature)
-
-#         temperature = la.solve(A, B)
-
-#         temperatureMoments.append(temperature)
-
-#         stepNumber += 1
-
-#     return temperatureMoments
-
-
-# ------------------------------------------ Прямой Эйлера
-
-# def solveOfTransitiveHeatTransfer(initialTemperature, heatCapcitnceMatrixWithBC, conductivityMatrixWithBC, thermalForceWithBC, timeStep):
-
-#     temperatureMoments = []
-
-#     # stepNumber = 1
-
-#     temperatureMoments.append(initialTemperature)
-
-#     for step in tmp:
-     
-#         for node in BC[1.0]:
-#             thermalForceWithBC[node - 1] = tmp[step]
-
-#         # A*X=B
-#         A = heatCapcitnceMatrixWithBC
-#         B = np.dot(heatCapcitnceMatrixWithBC, initialTemperature) - timeStep * np.dot(conductivityMatrixWithBC, initialTemperature) + timeStep * thermalForceWithBC
-
-#         temperature = la.solve(A, B)
-
-#         temperatureMoments.append(temperature)
-
-#         initialTemperature = temperature
-
-#         # stepNumber += 1
-
-#     return temperatureMoments

@@ -2,56 +2,71 @@ import numpy as np
 
 from readingMesh import readingMesh
 from readingMaterialProperties import getConductivity, getDensity, getSpecificHeat
-from readingBC import getBC
-from getConductivityMatrix import getConductivityMatrix
-from applyBC import nullMatrixRow, applyBCtoF, nullMatrixCol
+# from readingBC import getBC
+from getConductivityMatrix import getConductivityMatrix, getConductivityMatrixOld
+# from applyBC import nullMatrixRow, applyBCtoF, nullMatrixCol
 from getHeatCapcitnceMatrix import getHeatCapcitnceMatrix
-from solveHeatTransfer import solveOfTransitiveHeatTransfer
+from convertToDecimal import convertToDecimalVector, convertToDecimalNumber
+from solveHeatTransfer import solveOfTransitiveHeatTransfer, solveOfSteadyStateHeatTransfer, solveOfTransitiveHeatTransferOld
 from plotting2D import plotting2D
 
-# fileName = '../fixtures/test_2_feb.inp'
-fileName = '../fixtures/feb3.inp'
-# fileName = '../fixtures/200-elem.inp'
 
-fileName = "../fixtures/Job-8.inp"
+# fileName = '../fixtures/test_20_04.inp'
+fileName = '../fixtures/1-05.inp'
+
+flag = False
 
 [elementsLibrary, nodesLibrary] = readingMesh(fileName)
 
-# conductivity = getConductivity(fileName)
+conductivity = getConductivity(fileName)
+# conductivity = 22464
+
 density = getDensity(fileName)
 specificHeat = getSpecificHeat(fileName)
 
-conductivity = 1.3
+conductivityMatrix = getConductivityMatrixOld(elementsLibrary, nodesLibrary, conductivity, flag)
+
+if flag:
+    force = convertToDecimalVector(np.zeros(len(nodesLibrary)))
+    initialT = convertToDecimalVector(np.zeros(len(force)))
+else:
+    force = np.zeros(len(nodesLibrary))
+    initialT = np.zeros(len(force))
+
+capcitnceMatrix = getHeatCapcitnceMatrix(elementsLibrary, nodesLibrary, density, specificHeat)
 
 
-BC = getBC(fileName)
+temperature = solveOfTransitiveHeatTransfer(initialT, capcitnceMatrix, conductivityMatrix, force, flag)
 
-condictivityMatrixWithoutBC = getConductivityMatrix(elementsLibrary, nodesLibrary, conductivity)
-forceWithoutBC = np.zeros(len(nodesLibrary))
+for i in temperature[-1]:
+    print(i)
 
-#применение ГУ
-matrixK = nullMatrixRow(condictivityMatrixWithoutBC, BC)
-force1 = applyBCtoF(matrixK, forceWithoutBC, BC)
-conductivityMatrix = nullMatrixCol(matrixK, BC)
 
-# capcitnceMatrix = getHeatCapcitnceMatrix(elementsLibrary, nodesLibrary, density, specificHeat)
-capcitnceMatrixWithoutBC = getHeatCapcitnceMatrix(elementsLibrary, nodesLibrary, density, specificHeat)
+# print('node 3148')
+# for step in temperature:
+#     print(step[3147])
 
-force = force1
-# matrixC = nullMatrixRow(capcitnceMatrixWithoutBC, BC)
-# force = applyBCtoF(matrixC, force1, BC)
-# capcitnceMatrix = nullMatrixCol(matrixC, BC)
-capcitnceMatrix = capcitnceMatrixWithoutBC
+# print('node 2559')
+# for step in temperature:
+#     print(step[2558])
 
-initialT = np.zeros(len(force))
+# print('node 2396')
+# for step in temperature:
+#     print(step[2395])
 
-timeStep = 1
-countStep = 10
+# print('node 2238')
+# for step in temperature:
+#     print(step[2237])
 
-temperature = solveOfTransitiveHeatTransfer(initialT, capcitnceMatrix, conductivityMatrix, force, timeStep, countStep, BC)
 
-print(BC)
+# plotting2D(elementsLibrary, nodesLibrary, initialT)
+# plotting2D(elementsLibrary, nodesLibrary, temperature[i])
 
-i = countStep - 1
-plotting2D(elementsLibrary, nodesLibrary, temperature[i])
+# стационарная
 
+# temperature = solveOfSteadyStateHeatTransfer(conductivityMatrix, force, flag)
+
+# for i in temperature:
+#     print(i)
+
+# plotting2D(elementsLibrary, nodesLibrary, temperature)
