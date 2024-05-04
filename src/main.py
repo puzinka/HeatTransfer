@@ -3,11 +3,11 @@ import numpy as np
 from readingMesh import readingMesh
 from readingMaterialProperties import getConductivity, getDensity, getSpecificHeat
 # from readingBC import getBC
-from getConductivityMatrix import getConductivityMatrix, getConductivityMatrixOld
+from getConductivityMatrix import getConductivityMatrix
 # from applyBC import nullMatrixRow, applyBCtoF, nullMatrixCol
 from getHeatCapcitnceMatrix import getHeatCapcitnceMatrix
 from convertToDecimal import convertToDecimalVector, convertToDecimalNumber
-from solveHeatTransfer import solveOfTransitiveHeatTransfer, solveOfSteadyStateHeatTransfer, solveOfTransitiveHeatTransferOld
+from solveHeatTransfer import solveOfTransitiveHeatTransfer, solveOfSteadyStateHeatTransfer
 from plotting2D import plotting2D
 
 
@@ -24,7 +24,7 @@ conductivity = getConductivity(fileName)
 density = getDensity(fileName)
 specificHeat = getSpecificHeat(fileName)
 
-conductivityMatrix = getConductivityMatrixOld(elementsLibrary, nodesLibrary, conductivity, flag)
+conductivityMatrix = getConductivityMatrix(elementsLibrary, nodesLibrary, conductivity, flag)
 
 if flag:
     force = convertToDecimalVector(np.zeros(len(nodesLibrary)))

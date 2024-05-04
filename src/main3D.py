@@ -10,8 +10,8 @@ from getHeatCapcitnceMatrix import getHeatCapcitnceMatrix, getHeatCapcitnceMatri
 from solveHeatTransfer import solveOfTransitiveHeatTransfer, solveOfSteadyStateHeatTransfer
 # from plotting2D import plotting2D
 
-# fileName = '../fixtures/3d-28-04.inp'
-fileName = '../fixtures/3d-10m.inp'
+fileName = '../fixtures/3d-28-04.inp'
+# fileName = '../fixtures/3d-10m.inp'
 
 flag = False
 
@@ -31,18 +31,18 @@ initialT = np.zeros(len(force))
 
 capcitnceMatrix = getHeatCapcitnceMatrix3D(elementsLibrary, nodesLibrary, density, specificHeat)
 
-temperature = solveOfTransitiveHeatTransfer(initialT, capcitnceMatrix, conductivityMatrix, force, flag)
+# temperature = solveOfTransitiveHeatTransfer(initialT, capcitnceMatrix, conductivityMatrix, force, flag)
 
 # print(max(temperature[-1]))
 
 # print(temperature)
 
-for node in temperature[-1]:
-    print(node)
+# for node in temperature[-1]:
+#     print(node)
 
 # стационарная
 
-# temperature = solveOfSteadyStateHeatTransfer(conductivityMatrix, force, flag)
+temperature = solveOfSteadyStateHeatTransfer(conductivityMatrix, force, flag)
 
-# for i in temperature:
-#     print(i)
+for i in temperature:
+    print(i)

@@ -60,28 +60,25 @@ def solveOfSteadyStateHeatTransfer(conductivityMatrix, force, flag):
 
 
 # решение нестационарной задачи теплопроводности
-# set1 = [2,   3,   5,   6,  16,  17,  18,  19,  20,  21,  22,  23,  24,  39,  40,  41,
-#   42,  43,  44,  45,  46,  47,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,
-#   58,  59,  60,  61,  62,  63,  64,  65, 147, 148, 149, 150, 151, 152, 153, 154,
-#  155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
-#  171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186,
-#  187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202,
-#  203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218,
-#  219, 220, 221, 222, 223, 224, 225, 226, 227]
+set1 = [2,   3,   5,   6,  16,  17,  18,  19,  20,  21,  22,  23,  24,  39,  40,  41,
+        42,  43,  44,  45,  46,  47,  48,  49,  50,  51,  52,  53,  54,  55,  56,  57,
+        58,  59,  60,  61,  62,  63,  64,  65, 147, 148, 149, 150, 151, 152, 153, 154,
+        155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
+        171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186,
+        187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202,
+        203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218,
+        219, 220, 221, 222, 223, 224, 225, 226, 227]
 
-# set2 = [1,   4,   5,   6,   7,   8,   9,  10,  30,  31,  32,  33,  34,  35,  36,  37,
-#   38,  48,  49,  50,  51,  52,  53,  54,  55,  56,  66,  67,  68,  69,  70,  71,
-#   72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,
-#   88,  89,  90,  91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 250, 251,
-#  252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267,
-#  268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283,
-#  284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299,
-#  300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315,
-#  316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330]
+set2 = [1,   4,   5,   6,   7,   8,   9,  10,  30,  31,  32,  33,  34,  35,  36,  37,
+        38,  48,  49,  50,  51,  52,  53,  54,  55,  56,  66,  67,  68,  69,  70,  71,
+        72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,
+        88,  89,  90,  91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 250, 251,
+        252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267,
+        268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283,
+        284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299,
+        300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315,
+        316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330]
 
-set1 = [2,  5, 28, 29, 30, 31, 32, 33, 34, 35, 36]
-
-set2 = [1,  3,  4,  5, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
 
 arrayBC = [
 {5.0: set1,	18.7: set2},
@@ -820,87 +817,64 @@ arrayBC = [
 
 
 
-def solveOfTransitiveHeatTransfer(initialT, capcitnceMatrix, conductivityMatrix, force, flag = False):
-
-    temperatureMoments = []
-    temperatureMoments.append(initialT)
-    invC = np.linalg.inv(capcitnceMatrix)
-    timeStep = 1
-
-
-
-    stepNumber = 0
-
-
-
-    for BC in arrayBC:
-
-
-
-        stepNumber += 1
-        print(stepNumber)
-
-        
-
-        matrixK = nullMatrixRow(conductivityMatrix, BC, flag)
-        newForce = applyBCtoF(matrixK, force, BC, flag)
-        newConductivityMatrix = nullMatrixCol(matrixK, BC, flag)
-
-        T = initialT - timeStep * np.dot(np.dot(invC, newConductivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
-
-        temperatureMoments.append(T)
-
-        initialT = T
-
+def solveOfTransitiveHeatTransfer(initialT, capcitnceMatrix, conductivityMatrix, force, flag):
     
-    return temperatureMoments
+    if flag:
+
+        temperatureMoments = []
+        temperatureMoments.append(initialT)
+        invC = convertToDecimalMatrix(np.linalg.inv(capcitnceMatrix))
+        timeStep = convertToDecimalNumber(1)
+
+        for BC in arrayBC:
+
+            matrixK = nullMatrixRow(conductivityMatrix, BC, flag)
+            newForce = applyBCtoF(matrixK, force, BC, flag)
+            newConductivityMatrix = nullMatrixCol(matrixK, BC, flag)
+
+            T = initialT - timeStep * np.dot(np.dot(invC, newConductivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
+
+            for temperature in BC:
+                for node in BC[temperature]:
+                    T[int(node) - 1] = convertToDecimalNumber(temperature)
+
+            temperatureMoments.append(T)
+
+            initialT = T
+
+        return temperatureMoments
+
+    else:
+
+        temperatureMoments = []
+        temperatureMoments.append(initialT)
+        invC = np.linalg.inv(capcitnceMatrix)
+        timeStep = 0.1
 
 
-# def solveOfTransitiveHeatTransferOld(initialT, capcitnceMatrix, conductivityMatrix, force, timeStep, countStep, BC):
-    
-#     temperatureMoments = []
-#     temperatureMoments.append(initialT)
 
-#     invC = np.linalg.inv(capcitnceMatrix)
+        stepNumber = 0
 
-#     for i in range(1, countStep):
-#         T = initialT - timeStep * np.dot(np.dot(invC, conductivityMatrix), initialT) + timeStep * np.dot(invC, force)
 
-#         for temperature in BC:
-#             for node in BC[temperature]:
-#                 T[int(node) - 1] = temperature
 
-#         temperatureMoments.append(T)
+        for BC in arrayBC:
 
-#         initialT = T
 
-#     return temperatureMoments
 
-def solveOfTransitiveHeatTransferOld(initialT, capcitnceMatrix, conductivityMatrix, force):
-    
-    timeStep = 1
+            stepNumber += 1
+            print(stepNumber)
 
-    temperatureMoments = []
-    temperatureMoments.append(initialT)
+            
 
-    invC = np.linalg.inv(capcitnceMatrix)
+            matrixK = nullMatrixRow(conductivityMatrix, BC, flag)
+            newForce = applyBCtoF(matrixK, force, BC, flag)
+            newConductivityMatrix = nullMatrixCol(matrixK, BC, flag)
 
-    for BC in arrayBC:
+            T = initialT - timeStep * np.dot(np.dot(invC, newConductivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
 
-        matrixK = nullMatrixRow(conductivityMatrix, BC, False)
-        newForce = applyBCtoF(matrixK, force, BC, False)
-        newConductivityMatrix = nullMatrixCol(matrixK, BC, False)
+            temperatureMoments.append(T)
 
-        T = initialT - timeStep * np.dot(np.dot(invC, newConductivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
+            initialT = T
 
-        # for temperature in BC:
-        #     for node in BC[temperature]:
-        #         T[int(node) - 1] = temperature
-
-        temperatureMoments.append(T)
-
-        initialT = T
-
-    return temperatureMoments
-
+        return temperatureMoments
 
