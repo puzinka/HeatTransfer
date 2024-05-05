@@ -1,7 +1,7 @@
 import unittest
 import sys
 sys.path.append('../')
-from applyBC import nullMatrixRow, applyBCtoF
+from applyBC import nullMatrixRow, applyBCtoF, nullMatrixCol
 
 class applyBCTests(unittest.TestCase):
 
@@ -55,6 +55,24 @@ class applyBCTests(unittest.TestCase):
         
         self.assertEqual(F, expectedF)
 
+    def test_nullMatrixCol(self):
+        
+        Matrix = [
+            [1,2,3,4],
+            [5,6,7,8],
+            [9,10,11,12],
+            [13,14,15,16],
+        ]
+        BC = {5: [2], 20: [4]}
+        
+        ExpectMatrix = [
+            [1,0,3,0],
+            [5,6,7,0],
+            [9,0,11,0],
+            [13,0,15,16],
+        ]
+        
+        self.assertEqual(nullMatrixCol(Matrix, BC), ExpectMatrix)
 
 
 

@@ -9,7 +9,8 @@ from applyBC import nullMatrixRow, applyBCtoF, nullMatrixCol
 from plotting2D import plotting2D
 
 
-fileName = "../fixtures/4-05_fixed_2D.inp"
+# fileName = "../fixtures/4-05_fixed_2D.inp"
+fileName = "../fixtures/4-05_2D.inp"
 [elementsLibrary, nodesLibrary] = readingMesh(fileName)
 
 conductivity = getConductivity(fileName)
@@ -35,21 +36,22 @@ for number in range(1, len(elementsLibrary) + 1):
 
     area = 0.5 * abs(Xi * (Yj - Yk) + Xj * (Yk - Yi) + Xk * (Yi - Yj))
 
-    # matrix = [[1, Xi, Yi], [1, Xj, Yj], [1, Xk, Yk]]
-    # invMatrix = np.linalg.inv(matrix)
-    # gradientMatrix = np.array(invMatrix[1 : len(invMatrix) + 1])
+    matrix = [[1, Xi, Yi], [1, Xj, Yj], [1, Xk, Yk]]
+    invMatrix = np.linalg.inv(matrix)
+    gradientMatrix = np.array(invMatrix[1 : len(invMatrix) + 1])
+    
+    localCondictivityMatrix = area * np.dot(np.dot(np.transpose(gradientMatrix), materialPropertiesMatrix), gradientMatrix)
 
-    Bi = Yj - Yk
-    Bj = Yk - Yi
-    Bk = Yi - Yj
-    Ci = Xk - Xj
-    Cj = Xi - Xk
-    Ck = Xj - Xi
+    # Bi = Yj - Yk
+    # Bj = Yk - Yi
+    # Bk = Yi - Yj
+    # Ci = Xk - Xj
+    # Cj = Xi - Xk
+    # Ck = Xj - Xi
 
-    gradientMatrix = [[Bi, Bj, Bk], [Ci, Cj, Ck]]
+    # gradientMatrix = [[Bi, Bj, Bk], [Ci, Cj, Ck]]
 
-    # localCondictivityMatrix = 0.25 / area * np.dot(np.dot(np.transpose(gradientMatrix), materialPropertiesMatrix), gradientMatrix)
-    localCondictivityMatrix = 0.25 / area * np.dot(np.dot(np.transpose(gradientMatrix), materialPropertiesMatrix), gradientMatrix)
+    # localCondictivityMatrix = (1 / (4 * area)) * np.dot(np.dot(np.transpose(gradientMatrix), materialPropertiesMatrix), gradientMatrix)
 
     globalCondictivityMatrix = getGlobalMatrix(globalCondictivityMatrix, localCondictivityMatrix, number_i, number_j, number_k)
 
@@ -90,26 +92,58 @@ initialT = np.zeros(len(force))
 
 # ГУ
 
-# set1 = [2,  5, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+set1 = [2,  5, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89]
 
-# set2 = [1,  3,  4,  5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+set2 = [1,  3,  4,  5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
 
-# arrayBC = [
-#     {5.0: set1, 6.0: set2},
-#     {5.0: set1, 7.0: set2},
-#     {5.0: set1, 8.0: set2},
-#     {5.0: set1, 9.0: set2},
-#     {5.0: set1, 10.0: set2},
-#     {5.0: set1, 11.0: set2}
-# ]
+arrayBC = [
+    {5.0: set1, 6.0: set2},
+    {5.0: set1, 7.0: set2},
+    {5.0: set1, 8.0: set2},
+    {5.0: set1, 9.0: set2},
+    {5.0: set1, 10.0: set2},
+    {5.0: set1, 11.0: set2}
+]
 
-BC = {
-    5.0: [2,  5, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89],
-    20.0: [1,  3,  4,  5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
-}
+# BC = {
+#     5.0: [2,  5, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89],
+#     20.0: [1,  3,  4,  5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
+# }
 
 
 # нестационарное решение
+
+
+## постоянные ГУ
+
+# temperatureMoments = []
+# temperatureMoments.append(initialT)
+
+# invC = np.linalg.inv(globalHeatCapcitnceMatrix)
+# timeStep = 1
+# stepNumber = 0
+
+# matrixK = nullMatrixRow(globalCondictivityMatrix, BC)
+# newForce = applyBCtoF(matrixK, force, BC)
+# newConductivityMatrix = nullMatrixCol(matrixK, BC)
+
+# for i in range(10):
+
+#     stepNumber += 1
+#     print(stepNumber)
+
+#     T = initialT - timeStep * np.dot(np.dot(invC, newConductivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
+    
+#     # for temperature in BC:
+#     #     for node in BC[temperature]:
+#     #         T[int(node) - 1] = temperature
+    
+#     temperatureMoments.append(T)
+
+#     initialT = T
+
+
+## переменные ГУ
 
 temperatureMoments = []
 temperatureMoments.append(initialT)
@@ -118,40 +152,34 @@ invC = np.linalg.inv(globalHeatCapcitnceMatrix)
 timeStep = 1
 stepNumber = 0
 
-matrixK = nullMatrixRow(globalCondictivityMatrix, BC)
-newForce = applyBCtoF(matrixK, force, BC)
-newConductivityMatrix = nullMatrixCol(matrixK, BC)
+for BC in arrayBC:
 
-for i in range(11):
+    stepNumber += 1
+    print(stepNumber)
+
+    matrixK = nullMatrixRow(globalCondictivityMatrix, BC)
+    newForce = applyBCtoF(matrixK, force, BC)
+    newConductivityMatrix = nullMatrixCol(matrixK, BC)
+
     T = initialT - timeStep * np.dot(np.dot(invC, newConductivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
+    
+    for temperature in BC:
+        for node in BC[temperature]:
+            T[int(node) - 1] = temperature
+    
     temperatureMoments.append(T)
 
     initialT = T
-
-# for BC in arrayBC:
-
-#     stepNumber += 1
-#     print(stepNumber)
-
-#     matrixK = nullMatrixRow(globalCondictivityMatrix, BC)
-#     newForce = applyBCtoF(matrixK, force, BC)
-#     newConductivityMatrix = nullMatrixCol(matrixK, BC)
-
-#     # matrixK = nullMatrixRow(globalCondictivityMatrix, BC)
-#     # newForce = applyBCtoF(matrixK, force, BC)
-#     # globalCondictivityMatrix = nullMatrixCol(matrixK, BC)
-
-#     T = initialT - timeStep * np.dot(np.dot(invC, newConductivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
-#     # T = initialT - timeStep * np.dot(np.dot(invC, globalCondictivityMatrix), initialT) + timeStep * np.dot(invC, newForce)
-#     temperatureMoments.append(T)
-
-#     initialT = T
 
 
 for i in temperatureMoments[-1]:
     print(i)
 
 plotting2D(elementsLibrary, nodesLibrary, temperatureMoments[-1])
+
+
+
+
 
 
 # import csv

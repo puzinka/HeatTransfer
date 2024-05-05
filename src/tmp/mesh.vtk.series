@@ -1,0 +1,29 @@
+{
+  "file-series-version": "1.0",
+  "files": [
+    {
+      "name": "mesh0.vtk",
+      "time": 0
+    },
+    {
+      "name": "mesh1.vtk",
+      "time": 1
+    },
+    {
+      "name": "mesh2.vtk",
+      "time": 2
+    },
+    {
+      "name": "mesh3.vtk",
+      "time": 3
+    },
+    {
+      "name": "mesh4.vtk",
+      "time": 4
+    },
+    {
+      "name": "mesh5.vtk",
+      "time": 5
+    }
+  ]
+}

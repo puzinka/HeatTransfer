@@ -1,6 +1,6 @@
 import meshio
 from readingMesh import readingMesh
-from main3D import temperature, elementsLibrary, nodesLibrary
+from transitiveHeatTransfer3D import temperatureMoments, elementsLibrary, nodesLibrary
 import json
 
 points = []
@@ -17,10 +17,10 @@ cells = [
 
 
 
-for step in range(len(temperature)):
+for step in range(len(temperatureMoments)):
     data = dict()
 
-    data["T"] = temperature[step]
+    data["T"] = temperatureMoments[step]
 
     mesh = meshio.Mesh(
         points,
@@ -52,4 +52,4 @@ def create_vtk_series(filesCount, time_step):
     with open("tmp/mesh.vtk.series", "w") as f:
         json.dump(vtk_series, f, indent=2)
 
-create_vtk_series(len(temperature), 1)
+create_vtk_series(len(temperatureMoments), 1)

@@ -16,8 +16,32 @@ specificHeat = getSpecificHeat(fileName)
 
 # матрица теплопроводности
 
+# globalCondictivityMatrix = np.zeros([len(nodesLibrary), len(nodesLibrary)])
+# materialPropertiesMatrix = [[conductivity, 0, 0], [0, conductivity, 0], [0, 0, conductivity]]
+
+# for number in range(1, len(elementsLibrary) + 1):
+
+#     coordinatesMatrix = []
+#     nodeNumbers = []
+
+#     for node in elementsLibrary[number]:
+#         coordinatesMatrix.append(np.array(nodesLibrary[node]))
+#         nodeNumbers.append(node - 1)
+#     [[Xi, Yi, Zi], [Xj, Yj, Zj], [Xk, Yk, Zk], [Xl, Yl, Zl]] = coordinatesMatrix
+#     [number_i, number_j, number_k, number_l] = nodeNumbers
+
+#     matrix = [[1, Xi, Yi, Zi], [1, Xj, Yj, Zj], [1, Xk, Yk, Zk], [1, Xl, Yl, Zl]]
+#     invMatrix = np.linalg.inv(matrix)
+
+#     volume = np.abs(np.linalg.det([[Xj - Xi, Yj - Yi, Zj - Zi], [Xk - Xi, Yk - Yi, Zk - Zi], [Xl - Xi, Yl - Yi, Zl - Zi]]))
+#     gradientMatrix = np.array(invMatrix[1 : len(invMatrix) + 1])
+
+#     localCondictivityMatrix = volume * np.dot(np.dot(np.transpose(gradientMatrix), materialPropertiesMatrix), gradientMatrix) 
+#     globalCondictivityMatrix = getGlobalMatrix3D(globalCondictivityMatrix, localCondictivityMatrix, number_i, number_j, number_k, number_l)
+
+
 globalCondictivityMatrix = np.zeros([len(nodesLibrary), len(nodesLibrary)])
-materialPropertiesMatrix = [[conductivity, 0, 0], [0, conductivity, 0], [0, 0, conductivity]]
+Be = [[-1, 1, 0, 0], [-1, 0, 1, 0], [-1, 0, 0, 1]]
 
 for number in range(1, len(elementsLibrary) + 1):
 
@@ -30,13 +54,13 @@ for number in range(1, len(elementsLibrary) + 1):
     [[Xi, Yi, Zi], [Xj, Yj, Zj], [Xk, Yk, Zk], [Xl, Yl, Zl]] = coordinatesMatrix
     [number_i, number_j, number_k, number_l] = nodeNumbers
 
-    matrix = [[1, Xi, Yi, Zi], [1, Xj, Yj, Zj], [1, Xk, Yk, Zk], [1, Xl, Yl, Zl]]
-    invMatrix = np.linalg.inv(matrix)
+    j = np.dot(Be, coordinatesMatrix)
+    jDet = np.abs(np.linalg.det(j))
+    jInv = np.linalg.inv(j)
+    
+    gradientMatrix = np.dot(jInv, Be)
 
-    volume = np.abs(np.linalg.det([[Xj - Xi, Yj - Yi, Zj - Zi], [Xk - Xi, Yk - Yi, Zk - Zi], [Xl - Xi, Yl - Yi, Zl - Zi]]))
-    gradientMatrix = np.array(invMatrix[1 : len(invMatrix) + 1])
-
-    localCondictivityMatrix = volume * np.dot(np.dot(np.transpose(gradientMatrix), materialPropertiesMatrix), gradientMatrix) 
+    localCondictivityMatrix = 0.25 * jDet * conductivity * np.dot(np.transpose(gradientMatrix), gradientMatrix) 
     globalCondictivityMatrix = getGlobalMatrix3D(globalCondictivityMatrix, localCondictivityMatrix, number_i, number_j, number_k, number_l)
 
 
